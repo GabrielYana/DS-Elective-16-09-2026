@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Color Mosaic</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="mosaic" aria-label="Color mosaic">
+      <div class="tile coral tall-left" title="coral" aria-label="coral"></div>
+      <div class="tile turquoise top-small" title="turquoise" aria-label="turquoise"></div>
+      <div class="tile coral top-wide" title="coral" aria-label="coral"></div>
+      <div class="tile cream tall-right" title="cream" aria-label="cream"></div>
+
+      <div class="tile cream middle-wide" title="cream" aria-label="cream"></div>
+      <div class="tile gold middle-right" title="gold" aria-label="gold"></div>
+      <div class="tile gold bottom-left" title="gold" aria-label="gold"></div>
+      <div class="tile turquoise bottom-wide" title="turquoise" aria-label="turquoise"></div>
+      <div class="tile coral bottom-right" title="coral" aria-label="coral"></div>
+    </main>
+  </body>
+</html>
