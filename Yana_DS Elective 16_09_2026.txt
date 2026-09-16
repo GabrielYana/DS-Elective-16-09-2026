@@ -1,0 +1,126 @@
+DROP TABLE IF EXISTS EagleCharacteristics;
+DROP TABLE IF EXISTS EagleSpecies;
+GO
+
+CREATE TABLE EagleSpecies (
+    eagle_id int PRIMARY KEY,
+    eagle_name varchar(40) NOT NULL UNIQUE,
+    scientific_name varchar(80) NULL,
+    region varchar(40) NOT NULL,
+    habitat varchar(40) NOT NULL,
+    conservation_status varchar(30) NOT NULL
+);
+GO
+
+CREATE TABLE EagleCharacteristics (
+    characteristic_id int IDENTITY(1,1) PRIMARY KEY,
+    eagle_id int NOT NULL UNIQUE,
+    average_wingspan_cm decimal(6,2) NOT NULL,
+    average_weight_kg decimal(5,2) NOT NULL,
+    average_lifespan_years int NOT NULL,
+    primary_diet varchar(40) NOT NULL,
+    FOREIGN KEY (eagle_id) REFERENCES EagleSpecies(eagle_id)
+);
+GO
+
+INSERT INTO EagleSpecies
+    (eagle_id, eagle_name, scientific_name, region, habitat, conservation_status)
+VALUES
+    (1,  'Bald Eagle',             'Haliaeetus leucocephalus',     'North America', 'Lakes and rivers',       'Least Concern'),
+    (2,  'Golden Eagle',            'Aquila chrysaetos',            'North America', 'Mountains and grasslands','Least Concern'),
+    (3,  'White-Tailed Eagle',     'Haliaeetus albicilla',          'Europe and Asia','Coasts and wetlands',   'Least Concern'),
+    (4,  'Booted Eagle',            'Hieraaetus pennatus',           'Europe and Asia','Woodlands',             'Least Concern'),
+    (5,  'Black Hawk-Eagle',        'Spizaetus tyrannus',             'Central and South America','Tropical forests','Least Concern'),
+    (6,  'Little Eagle',            'Hieraaetus morphnoides',         'Australia',     'Open woodland',          'Least Concern'),
+    (7,  'Philippine Eagle',        'Pithecophaga jefferyi',          'Philippines',   'Rainforests',            'Critically Endangered'),
+    (8,  'Steller''s Sea Eagle',    'Haliaeetus pelagicus',           'Northeast Asia','Coasts and rivers',      'Vulnerable'),
+    (9,  'Bateleur Eagle',          'Terathopius ecaudatus',           'Sub-Saharan Africa','Savanna and woodland','Near Threatened'),
+    (10, 'Crowned Eagle',           'Stephanoaetus coronatus',         'Sub-Saharan Africa','Forests',             'Least Concern'),
+    (11, 'Martial Eagle',           'Polemaetus bellicosus',           'Sub-Saharan Africa','Savanna',              'Vulnerable'),
+    (12, 'African Fish Eagle',      'Haliaeetus vocifer',              'Sub-Saharan Africa','Lakes and rivers',     'Least Concern'),
+    (13, 'Crested Eagle',           'Morphnus guianensis',              'South America', 'Tropical forests',       'Near Threatened'),
+    (14, 'Harpy Eagle',             'Harpia harpyja',                   'Central and South America','Rainforests','Near Threatened'),
+    (15, 'Andaman Serpent Eagle',   'Spilornis elgini',                 'Andaman Islands','Tropical forests',      'Least Concern');
+GO
+
+INSERT INTO EagleCharacteristics
+    (eagle_id, average_wingspan_cm, average_weight_kg, average_lifespan_years, primary_diet)
+VALUES
+    (1,  220.00, 6.30, 20, 'Fish and small mammals'),
+    (2,  220.00, 5.00, 30, 'Mammals and birds'),
+    (3,  240.00, 6.00, 25, 'Fish and water birds'),
+    (4,  130.00, 1.00, 15, 'Small mammals and reptiles'),
+    (5,  120.00, 1.20, 18, 'Birds and small mammals'),
+    (6,  120.00, 1.00, 16, 'Small mammals and reptiles'),
+    (7,  220.00, 6.00, 30, 'Mammals and birds'),
+    (8,  250.00, 9.00, 25, 'Fish and water birds'),
+    (9,  180.00, 2.70, 25, 'Carrion and small animals'),
+    (10, 180.00, 4.00, 20, 'Monkeys and small mammals'),
+    (11, 260.00, 6.00, 25, 'Mammals and birds'),
+    (12, 240.00, 3.00, 20, 'Fish and water birds'),
+    (13, 150.00, 1.50, 20, 'Birds and reptiles'),
+    (14, 220.00, 7.00, 25, 'Sloths and monkeys'),
+    (15, 115.00, 0.90, 15, 'Snakes and lizards');
+GO
+
+-- 1: Which eagles have the largest average wingspans?
+SELECT TOP 5
+    e.eagle_name AS [Eagle],
+    e.region AS [Region],
+    c.average_wingspan_cm AS [Average Wingspan CM]
+FROM EagleSpecies AS e
+INNER JOIN EagleCharacteristics AS c
+    ON e.eagle_id = c.eagle_id
+ORDER BY c.average_wingspan_cm DESC;
+
+-- 2: Which eagles live in forests or rainforests?
+SELECT
+    e.eagle_name AS [Eagle],
+    e.region AS [Region],
+    e.habitat AS [Habitat],
+    e.conservation_status AS [Conservation Status]
+FROM EagleSpecies AS e
+WHERE e.habitat IN ('Forests', 'Rainforests', 'Tropical forests')
+ORDER BY e.eagle_name;
+
+-- 3: Which eagle species are threatened?
+SELECT
+    e.eagle_name AS [Eagle],
+    e.region AS [Region],
+    e.conservation_status AS [Conservation Status],
+    c.primary_diet AS [Primary Diet]
+FROM EagleSpecies AS e
+INNER JOIN EagleCharacteristics AS c
+    ON e.eagle_id = c.eagle_id
+WHERE e.conservation_status IN ('Critically Endangered', 'Vulnerable', 'Near Threatened')
+ORDER BY e.conservation_status, e.eagle_name;
+
+-- Function
+-- 4: What are the average wingspan, average weight, and longest lifespan?
+SELECT
+    AVG(c.average_wingspan_cm) AS [Average Wingspan CM],
+    AVG(c.average_weight_kg) AS [Average Weight KG],
+    MAX(c.average_lifespan_years) AS [Longest Lifespan Years]
+FROM EagleCharacteristics AS c;
+
+-- 5: How many eagles are recorded in each conservation-status category?
+SELECT
+    e.conservation_status AS [Conservation Status],
+    COUNT(*) AS [Number of Eagles]
+FROM EagleSpecies AS e
+GROUP BY e.conservation_status
+ORDER BY COUNT(*) DESC, e.conservation_status;
+
+-- 6: Which eagles have a wingspan above the overall average?
+SELECT
+    UPPER(e.eagle_name) AS [Eagle Name],
+    c.average_wingspan_cm AS [Wingspan CM],
+    CAST(c.average_wingspan_cm -
+        (SELECT AVG(average_wingspan_cm) FROM EagleCharacteristics)
+        AS decimal(6,2)) AS [CM Above Average]
+FROM EagleSpecies AS e
+INNER JOIN EagleCharacteristics AS c
+    ON e.eagle_id = c.eagle_id
+WHERE c.average_wingspan_cm >
+      (SELECT AVG(average_wingspan_cm) FROM EagleCharacteristics)
+ORDER BY c.average_wingspan_cm DESC;
